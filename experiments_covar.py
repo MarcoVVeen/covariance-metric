@@ -77,7 +77,7 @@ def experiment_base(data_train, data_test, ate, use_predicted=False):
     return run_res
 
 
-def hidden_confounder_experiment(hidden_coeffs=[0.0, 0.2, 0.4, 0.6, 0.8, 1.], ate=2, tau_modif=[0, 0], overlap="incomplete", use_predicted=False,
+def hidden_confounder_experiment(ate=2, tau_modif=[0, 0], overlap="incomplete", use_predicted=False,
                                  train_samples=10000, test_samples=10000, seed=10, runs=25, dir_name="results/hidden_linear"):
     """
     Base hidden confounder experiment for increasing outcome strength of hidden confounder.
@@ -94,6 +94,7 @@ def hidden_confounder_experiment(hidden_coeffs=[0.0, 0.2, 0.4, 0.6, 0.8, 1.], at
         os.makedirs(dir_name)
     print(f"\nSaving in dir {dir_name}\n")
 
+    hidden_coeffs = [0.0, 0.2, 0.4, 0.6, 0.8, 1.]
     for i in hidden_coeffs:
         print(f"Current hidden confounder strength: {i}")
         res = []
