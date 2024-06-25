@@ -1,6 +1,5 @@
 import os
 import json
-import time
 import numpy as np
 
 from covar_metric import covar_metric
@@ -78,14 +77,15 @@ def experiment_base(data_train, data_test, ate, use_predicted=False):
     return run_res
 
 
-def hidden_confounder_experiment(hidden_coeffs=[0.0, 0.2, 0.4, 0.6, 0.8, 1.], ate=2, overlap="incomplete", use_predicted=False,
+def hidden_confounder_experiment(hidden_coeffs=[0.0, 0.2, 0.4, 0.6, 0.8, 1.], ate=2, tau_modif=[0, 0], overlap="incomplete", use_predicted=False,
                                  train_samples=10000, test_samples=10000, seed=10, runs=25, dir_name="results/hidden_linear"):
     """
     Base hidden confounder experiment for increasing outcome strength of hidden confounder.
 
     :param hidden_coeffs:   list of increasing coefficients for hidden confounder
     :param ate:     true ate
-    :param runs:    num runs
+    :param tau_modif:   effect modification values
+    :param overlap:     "incomplete" or "complete"
     :param dir_name:    results directory
     :return:    -
     """
@@ -98,12 +98,17 @@ def hidden_confounder_experiment(hidden_coeffs=[0.0, 0.2, 0.4, 0.6, 0.8, 1.], at
         print(f"Current hidden confounder strength: {i}")
         res = []
 
-        for _ in range(runs):
-            generator = LinearGenerator(beta_hidden=[i], tau=ate, overlap=overlap)
-            data_train = generator.get_data(num_samples=train_samples)
-            data_test = generator.get_data(num_samples=test_samples)
+        generator = LinearGenerator(beta_hidden=[i], tau=ate, overlap=overlap, tau_modif=tau_modif)
+        ate_true = ate
+        if np.any(tau_modif):
+            data_test = generator.get_data(num_samples=100000)
+            ate_true = np.mean(data_test['Y1']-data_test['Y0'])
+        data_test = generator.get_data(num_samples=test_samples)
 
-            res.append(experiment_base(data_train, data_test, ate, use_predicted=use_predicted))
+        for _ in range(runs):
+            data_train = generator.get_data(num_samples=train_samples)
+
+            res.append(experiment_base(data_train, data_test, ate_true, use_predicted=use_predicted))
 
         if not os.path.exists(f"{dir_name}/coeff_{i}"):
             os.makedirs(f"{dir_name}/coeff_{i}")
@@ -115,8 +120,8 @@ def hidden_confounder_experiment(hidden_coeffs=[0.0, 0.2, 0.4, 0.6, 0.8, 1.], at
 
 if __name__ == '__main__':
     hidden_confounder_experiment()
-    # hidden_confounder_experiment(test_samples=100000, dir_name="results/hidden_linear_100k")
-
+    hidden_confounder_experiment(test_samples=100000, dir_name="results/hidden_linear_100k")
     hidden_confounder_experiment(overlap="complete", dir_name="results/hidden_linear_complete")
+    hidden_confounder_experiment(tau_modif=[0.5, 0], test_samples=100000, dir_name="results/hidden_linear_modif")
 
     hidden_confounder_experiment(use_predicted=True, dir_name="results/hidden_linear_predicted")
