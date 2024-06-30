@@ -1,11 +1,14 @@
 import numpy as np
 
-from sklearn.linear_model import LogisticRegression
-
 
 def covar_metric(repres, reduced_prop, t, y0, y1, bins=40, hist_range=[[-2.5, 2.5], [-2.5, 2.5]], eps=1e-4):
     """
     Measures the confounding bias in a 2d representation repres.
+
+    Uses a covariance metric for measuring confounding bias given a feature representation from the idea of
+        deconfounding scores originally by:
+    "Deconfounding Scores: Feature Representations for Causal Effect Estimation with Weak Overlap" (https://arxiv.org/abs/2104.05762)
+
 
     :param repres:  2d representation
     :param reduced_prop:    reduced propensity scores (prob. treatment given representation)

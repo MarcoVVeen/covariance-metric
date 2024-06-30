@@ -68,7 +68,7 @@ def plot_covar(dir, ylims=None, plot_title=None):
 
     if ylims:
         plt.ylim(ylims[0], ylims[1])
-    
+
     plt.legend()
     fig.savefig(f"{dir}/covar_hidden_conf")
     plt.close(fig)
