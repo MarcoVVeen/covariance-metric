@@ -1,7 +1,7 @@
 import torch as th
 import torch.nn as nn
 
-from IPM import wasserstein_loss
+from models.IPM import wasserstein_loss
 
 
 class Tarnet(nn.Module):

@@ -17,6 +17,14 @@ from sklearn.linear_model import LogisticRegression
 
 
 def train(train_loader, model, optimizer):
+    """
+    Single training loop for given model.
+
+    :param train_loader:    data loader for training set
+    :param model:   model to train (TARNet/DragonNet)
+    :param optimizer:   optimiser to use
+    :return:    training loss
+    """
     avg_loss = 0
     for i, data_tr in enumerate(train_loader):
         optimizer.zero_grad()
@@ -32,6 +40,22 @@ def train(train_loader, model, optimizer):
 
 
 def run(model, data_train, data_test, ate=2., lamb=1., epochs=25, batch_size=512, tarnet=True, eps=0.001, lr=1e-1):
+    """
+    Runs model training and evaluation for a single epoch.
+    Trains model and evaluates on test set.
+
+    :param model:   model to use
+    :param data_train:  train data loader
+    :param data_test:   test data loader
+    :param ate:     true ATE
+    :param lamb:    lambda for Wasserstein loss
+    :param epochs:  epochs
+    :param batch_size:  batch size
+    :param tarnet:  flag for TARNet model or not
+    :param eps:     small division epsilon
+    :param lr:  learning rate
+    :return:    dict with various results  (losses, resulting ATE/confounding biases, ipw/aipw results)
+    """
     data_scaler = StandardScaler()
     X_tr = data_scaler.fit_transform(data_train['X'])
     X_test = data_scaler.transform(data_test['X'])
@@ -159,6 +183,23 @@ def run(model, data_train, data_test, ate=2., lamb=1., epochs=25, batch_size=512
 def nonlinear_experiment(num_conf=4, num_prog=0, num_iv=0, f_y=default_fy, ate=2., f_tau_modif=None,
                          num_shared_layers=2, num_head_layers=1, dir_name="results/non-linear",
                          lamb=1., epochs=25, runs=25):
+    """
+    Runs an experiment with TARNet and DragonNet.
+
+    :param num_conf:    number of confounders
+    :param num_prog:    number of prognostic variables
+    :param num_iv:  number of instrumental variables
+    :param f_y:     outcome function for Y
+    :param ate:     true (constant) ate
+    :param f_tau_modif:     effect modification function
+    :param num_shared_layers:   number of shared layers in models
+    :param num_head_layers:     number of head layers in models
+    :param dir_name:    directory name for results
+    :param lamb:    lambda for Wasserstein
+    :param epochs:  epochs
+    :param runs:    runs per epoch
+    :return:    -
+    """
     seed = 10
     np.random.seed(seed=seed)
     th.manual_seed(seed)
@@ -187,10 +228,10 @@ def nonlinear_experiment(num_conf=4, num_prog=0, num_iv=0, f_y=default_fy, ate=2
         if f_tau_modif is not None:
             data_test = generator.get_data(num_samples=100000)
             ate_true = np.mean(data_test['Y1'] - data_test['Y0'])
-        data_test = generator.get_data(num_samples=10000)
 
         for j in range(runs):
             data_train = generator.get_data(num_samples=10000)
+            data_test = generator.get_data(num_samples=10000)
             for alpha in alphas:
                 tarnet = True
                 imb_model = Tarnet(data_train['X'].shape[1], alpha=alpha, lamb=lamb,

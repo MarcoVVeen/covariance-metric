@@ -1,6 +1,6 @@
 import torch as th
 import torch.nn as nn
-from gradient_reversal import GradientReversal
+from models.gradient_reversal import GradientReversal
 
 class DragonNet(nn.Module):
     """

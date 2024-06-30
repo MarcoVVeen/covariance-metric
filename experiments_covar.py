@@ -104,10 +104,10 @@ def hidden_confounder_experiment(ate=2, tau_modif=[0, 0], overlap="incomplete", 
         if np.any(tau_modif):
             data_test = generator.get_data(num_samples=100000)
             ate_true = np.mean(data_test['Y1']-data_test['Y0'])
-        data_test = generator.get_data(num_samples=test_samples)
 
         for _ in range(runs):
             data_train = generator.get_data(num_samples=train_samples)
+            data_test = generator.get_data(num_samples=test_samples)
 
             res.append(experiment_base(data_train, data_test, ate_true, use_predicted=use_predicted))
 
